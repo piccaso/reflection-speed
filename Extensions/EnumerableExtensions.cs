@@ -49,23 +49,23 @@ namespace Extensions {
 
         public static DataTable ToDataTable<T>(this IEnumerable<T> collection) {
             var dataTable = new DataTable();
+            var properties = typeof(T)
+                            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                            .Where(p => p.CanRead)
+                            .ToArray();
 
-            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                      .Where(p => p.CanRead)
-                                      .Select(p => new {
-                                           p.Name,
-                                           p.PropertyType,
-                                           GetValue = CompileGetter<T>(p.Name),
-                                       }).ToList();
+            if (properties.Length < 1) return null;
+            var getters = new Func<T, object>[properties.Length];
 
-            foreach (var property in properties) {
-                dataTable.Columns.Add(property.Name, property.PropertyType);
+            for (var i = 0; i < properties.Length; i++) {
+                dataTable.Columns.Add(properties[i].Name, properties[i].PropertyType);
+                getters[i] = CompileGetter<T>(properties[i].Name);
             }
-            
+
             foreach (var row in collection) {
-                var dtRow = new object[properties.Count];
-                for (var i = 0; i < properties.Count; i++) {
-                    dtRow[i] = properties[i].GetValue(row);
+                var dtRow = new object[properties.Length];
+                for (var i = 0; i < properties.Length; i++) {
+                    dtRow[i] = getters[i].Invoke(row);
                 }
                 dataTable.Rows.Add(dtRow);
             }

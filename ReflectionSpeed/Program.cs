@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using Extensions;
 
 namespace ReflectionSpeed
@@ -12,7 +10,7 @@ namespace ReflectionSpeed
     {
         static void Main(string[] args) {
 
-            for (var i = 0; i < 10; i++) {
+            for (var i = 0; i < 3; i++) {
                 DirectCall();
                 WithLambda();
                 WithReflectionDelegate();
