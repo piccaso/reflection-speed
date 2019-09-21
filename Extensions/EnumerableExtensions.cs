@@ -58,14 +58,15 @@ namespace Extensions {
             var getters = new Func<T, object>[properties.Length];
 
             for (var i = 0; i < properties.Length; i++) {
-                dataTable.Columns.Add(properties[i].Name, properties[i].PropertyType);
+                var columnType = Nullable.GetUnderlyingType(properties[i].PropertyType) ?? properties[i].PropertyType;
+                dataTable.Columns.Add(properties[i].Name, columnType);
                 getters[i] = CompileGetter<T>(properties[i].Name);
             }
 
             foreach (var row in collection) {
                 var dtRow = new object[properties.Length];
                 for (var i = 0; i < properties.Length; i++) {
-                    dtRow[i] = getters[i].Invoke(row);
+                    dtRow[i] = getters[i].Invoke(row) ?? DBNull.Value;
                 }
                 dataTable.Rows.Add(dtRow);
             }
