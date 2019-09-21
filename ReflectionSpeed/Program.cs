@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Extensions;
+using FastMember;
 
 namespace ReflectionSpeed
 {
@@ -12,8 +13,11 @@ namespace ReflectionSpeed
 
             for (var i = 0; i < 3; i++) {
                 DirectCall();
-                WithLambda();
                 WithReflectionDelegate();
+                WithLambda();
+                WithFastReflection();
+                WithFastMemberTypeAccessor();
+                WithFastMemberObjectAccessor();
                 WithReflection();
                 Console.WriteLine();
                 System.Threading.Thread.Sleep(100);
@@ -53,6 +57,54 @@ namespace ReflectionSpeed
             }
             sw.Stop();
             Console.WriteLine($"WithReflection: {sw.Elapsed.TotalMilliseconds} msec");
+        }
+
+        static void WithFastMemberObjectAccessor() {
+            var list = GetCollection();
+            var sw = new Stopwatch();
+            
+            object aux = 0;
+            sw.Start();
+            foreach (var obj in list) {
+                var oa = ObjectAccessor.Create(obj);
+                aux = oa["Number"];
+                oa["Number"] = 3;
+            }
+            sw.Stop();
+            Console.WriteLine($"WithFastMemberObjectAccessor: {sw.Elapsed.TotalMilliseconds} msec");
+        }
+
+        static void WithFastMemberTypeAccessor() {
+            var list = GetCollection();
+            var sw = new Stopwatch();
+            
+            object aux = 0;
+            var ta = TypeAccessor.Create(typeof(MyClass));
+            sw.Start();
+            foreach (var obj in list) {
+                aux = ta[obj, "Number"];
+                ta[obj, "Number"] = 3;
+            }
+            sw.Stop();
+            Console.WriteLine($"WithFastMemberTypeAccessor: {sw.Elapsed.TotalMilliseconds} msec");
+        }
+
+        static void WithFastReflection() {
+            var list = GetCollection();
+            var sw = new Stopwatch();
+            
+            object aux = 0;
+            var pi = list.First().GetType().GetProperty("Number");
+            var getter = pi.DelegateForGet();
+            var setter = pi.DelegateForSet();
+            sw.Start();
+            foreach (var obj in list) {
+                aux = getter(obj);
+                var o = (object)obj;
+                setter(ref o, 3);
+            }
+            sw.Stop();
+            Console.WriteLine($"WithFastReflection: {sw.Elapsed.TotalMilliseconds} msec");
         }
 
 
