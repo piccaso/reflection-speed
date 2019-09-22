@@ -9,21 +9,23 @@ using System.Reflection;
 namespace Extensions {
     public static class EnumerableExtensions {
 
-        internal static Func<TClass, object> CompileGetter<TClass>(string propertyName) {
+        internal static Func<TClass, object> CompileGetter<TClass>(string propertyName) => CompileGetter<TClass, object>(propertyName);
+        internal static Func<TClass, TProperty> CompileGetter<TClass, TProperty>(string propertyName) {
             var param = Expression.Parameter(typeof(TClass));
-            var body = Expression.Convert(Expression.Property(param, propertyName), typeof(object));
-            return Expression.Lambda<Func<TClass, object>>(body,param).Compile();
+            var body = Expression.Convert(Expression.Property(param, propertyName), typeof(TProperty));
+            return Expression.Lambda<Func<TClass, TProperty>>(body, param).Compile();
         }
 
-        internal static Action<TClass, object> CompileSetter<TClass>(string propertyName) {
+        internal static Action<TClass, object> CompileSetter<TClass>(string propertyName) => CompileSetter<TClass, object>(propertyName);
+        internal static Action<TClass, TProperty> CompileSetter<TClass, TProperty>(string propertyName) {
             var propertyInfo = typeof(TClass).GetProperty(propertyName);
             if (propertyInfo == null) return null;
             var targetType = propertyInfo.DeclaringType;
             if (targetType == null) return null;
             var param = Expression.Parameter(targetType);
-            var value = Expression.Parameter(typeof(object));
+            var value = Expression.Parameter(typeof(TProperty));
             var body = Expression.Call(param, propertyInfo.GetSetMethod(), Expression.Convert(value, propertyInfo.PropertyType));
-            return Expression.Lambda<Action<TClass, object>>(body, param, value).Compile();
+            return Expression.Lambda<Action<TClass, TProperty>>(body, param, value).Compile();
         }
 
         public static ICollection<IDictionary<string, object>> ToDictionaryCollection<T>(this IEnumerable<T> enumerable) {

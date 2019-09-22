@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Extensions;
 using NUnit.Framework;
@@ -49,6 +50,45 @@ namespace Tests
             Assert.AreEqual("1", dt.Rows[0][1]);
             Assert.AreEqual(DBNull.Value, dt.Rows[0][2]);
             Assert.AreEqual(1, dt.Rows[1][2]);
+        }
+
+        [Test]
+        public void DynamicToDict() {
+            var dictionaries = Enumerable.Range(1, 1000).Select(r => new {Nr = r, Text = r.ToString(), Nullable = r % 2 == 0 ? r / 2 : (int?) null}).ToDictionaryCollection().ToList();
+            Assert.IsNotNull(dictionaries);
+            Assert.AreEqual(1000, dictionaries.Count);
+            Assert.AreEqual("Nr", dictionaries[0].Keys.First());
+            Assert.AreEqual("1", dictionaries[0]["Text"]);
+            Assert.AreEqual(1, dictionaries[0]["Nr"]);
+        }
+
+        [Test]
+        public void CompileTypedSetter() {
+            var o = new SomeType();
+            var setter = EnumerableExtensions.CompileSetter<SomeType, int?>("Nullable");
+
+            setter(o, 1);
+            Assert.AreEqual(1, o.Nullable);
+            Assert.IsTrue(o.Nullable.HasValue);
+
+            setter(o, null);
+            Assert.AreEqual(null, o.Nullable);
+            Assert.IsFalse(o.Nullable.HasValue);
+        }
+
+        
+        [Test]
+        public void CompileSetter() {
+            var o = new SomeType();
+            var setter = EnumerableExtensions.CompileSetter<SomeType>("Nullable");
+
+            setter(o, 1);
+            Assert.AreEqual(1, o.Nullable);
+            Assert.IsTrue(o.Nullable.HasValue);
+
+            setter(o, null);
+            Assert.AreEqual(null, o.Nullable);
+            Assert.IsFalse(o.Nullable.HasValue);
         }
     }
 

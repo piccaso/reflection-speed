@@ -5,7 +5,7 @@ using System.Reflection;
 // http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
 // http://web.archive.org/web/20081025203355/http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
 
-namespace Extensions {
+namespace ReflectionSpeed {
     internal static class ReflectionUtility {
         internal static Func<object, object> GetGetMethodAsOpenDelegate(this PropertyInfo property) {
             // get the get method for the property
