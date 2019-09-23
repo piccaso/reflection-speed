@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Extensions;
 using NUnit.Framework;
+using ReflectionSpeed;
 
 namespace Tests
 {
@@ -93,6 +94,17 @@ namespace Tests
             setter(o, null);
             Assert.AreEqual(null, o.Nullable);
             Assert.IsFalse(o.Nullable.HasValue);
+        }
+
+        //[Test]
+        public void EmitGetter() {
+            var o = new SomeType();
+            var pi = typeof(SomeType).GetProperty("Nullable");
+            var getter = IlEmit.EmitGetter(pi); // not working!
+            Assert.AreEqual(null, getter(o));
+            o.Nullable = 3;
+            Assert.AreEqual(3, getter(o));
+
         }
     }
 
