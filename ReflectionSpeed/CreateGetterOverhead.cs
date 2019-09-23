@@ -5,14 +5,17 @@ using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using Extensions;
+using Fasterflect;
 using FastMember;
 
 namespace ReflectionSpeed {
     [RankColumn, MemoryDiagnoser, Orderer(SummaryOrderPolicy.FastestToSlowest)]
-    //[SimpleJob(invocationCount:1, runStrategy:BenchmarkDotNet.Engines.RunStrategy.Monitoring)]
+    [PlainExporter, RPlotExporter]
+    [SimpleJob(invocationCount:1, runStrategy:BenchmarkDotNet.Engines.RunStrategy.Monitoring)]
     public class CreateGetterOverhead {
 
-        [Params(1, 10_000, 100_000, 10_000_000)]
+        //[Params(0, 1, 10_000, 100_000, 10_000_000)]
+        [Params(1000)]
         public int CollectionSize;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -29,12 +32,36 @@ namespace ReflectionSpeed {
 
             
             for (var i = 0; i < classCollection.Count; i++) {
-                var val = classCollection[i].Nr;
+                var row = classCollection[i];
+                var val = row.Nr;
                 Verify(i, val);
             }
 
             for (var i = 0; i < anonCollection.Count; i++) {
-                var val = anonCollection[i].Nr;
+                var row = classCollection[i];
+                var val = row.Nr;
+                Verify(i, val);
+            }
+        }
+
+        [Benchmark]
+        public void Fasterflect() {
+            var classCollection = Enumerable.Range(0, CollectionSize).Select(i => new DataClass {Nr = i}).ToList();
+            var anonCollection = Enumerable.Range(0, CollectionSize).Select(i => new {Nr = i}).ToList();
+
+            MemberGetter Getter<T>(IEnumerable<T> coll) {
+                return typeof(T).DelegateForGetPropertyValue("Nr");
+            }
+
+            var classGetter = Getter(classCollection);
+            for (var i = 0; i < classCollection.Count; i++) {
+                var val = classGetter(classCollection[i]);
+                Verify(i, val);
+            }
+
+            var anonGetter = Getter(anonCollection);
+            for (var i = 0; i < anonCollection.Count; i++) {
+                var val = anonGetter(anonCollection[i]);
                 Verify(i, val);
             }
         }

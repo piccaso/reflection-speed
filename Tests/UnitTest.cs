@@ -96,15 +96,9 @@ namespace Tests
             Assert.IsFalse(o.Nullable.HasValue);
         }
 
-        //[Test]
-        public void EmitGetter() {
-            var o = new SomeType();
-            var pi = typeof(SomeType).GetProperty("Nullable");
-            var getter = IlEmit.EmitGetter(pi); // not working!
-            Assert.AreEqual(null, getter(o));
-            o.Nullable = 3;
-            Assert.AreEqual(3, getter(o));
-
+        [Test]
+        public void Fasterflect() {
+            new CreateGetterOverhead{CollectionSize = 100}.Fasterflect();
         }
     }
 
