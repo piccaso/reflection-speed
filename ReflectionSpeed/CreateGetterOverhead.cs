@@ -12,7 +12,7 @@ namespace ReflectionSpeed {
     //[SimpleJob(invocationCount:1, runStrategy:BenchmarkDotNet.Engines.RunStrategy.Monitoring)]
     public class CreateGetterOverhead {
 
-        [Params(1, 1_000, 10_000, 100_000)]
+        [Params(1, 10_000, 100_000, 10_000_000)]
         public int CollectionSize;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
