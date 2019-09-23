@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using Extensions;
@@ -23,6 +24,7 @@ namespace ReflectionSpeed
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Verify<T>(T expected, object actual) where T : IEquatable<T> {
             if (!(actual is T a) || !EqualityComparer<T>.Default.Equals(expected, a)) {
                 throw new Exception($"{expected} != {actual}");
