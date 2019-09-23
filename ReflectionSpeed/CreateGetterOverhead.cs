@@ -9,15 +9,33 @@ using FastMember;
 
 namespace ReflectionSpeed {
     [RankColumn, MemoryDiagnoser, Orderer(SummaryOrderPolicy.FastestToSlowest)]
+    //[SimpleJob(invocationCount:1, runStrategy:BenchmarkDotNet.Engines.RunStrategy.Monitoring)]
     public class CreateGetterOverhead {
 
-        [Params(1, 5_000, 100_000)]
+        [Params(1, 1_000, 10_000, 100_000)]
         public int CollectionSize;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void Verify<T>(T expected, object actual) where T : IEquatable<T> {
             if (!(actual is T a) || !EqualityComparer<T>.Default.Equals(expected, a)) {
                 throw new Exception($"{expected} != {actual}");
+            }
+        }
+
+        [Benchmark(Baseline = true)]
+        public void Direct() {
+            var classCollection = Enumerable.Range(0, CollectionSize).Select(i => new DataClass {Nr = i}).ToList();
+            var anonCollection = Enumerable.Range(0, CollectionSize).Select(i => new {Nr = i}).ToList();
+
+            
+            for (var i = 0; i < classCollection.Count; i++) {
+                var val = classCollection[i].Nr;
+                Verify(i, val);
+            }
+
+            for (var i = 0; i < anonCollection.Count; i++) {
+                var val = anonCollection[i].Nr;
+                Verify(i, val);
             }
         }
 
