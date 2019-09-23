@@ -13,7 +13,7 @@ namespace ReflectionSpeed
     public class ClassPropertyBenchmark {
         private static IList<DataClass> _data;
 
-        [Params(10)]
+        [Params(10000)]
         public int N;
 
         [GlobalSetup]
@@ -23,8 +23,8 @@ namespace ReflectionSpeed
             }
         }
 
-        private static void Verify(int expected, object actual) {
-            if (!(actual is int i) || expected != i) {
+        private static void Verify<T>(T expected, object actual) where T : IEquatable<T> {
+            if (!(actual is T a) || !EqualityComparer<T>.Default.Equals(expected, a)) {
                 throw new Exception($"{expected} != {actual}");
             }
         }
@@ -46,7 +46,7 @@ namespace ReflectionSpeed
             }
         }
 
-        private static readonly Func<DataClass, object> LambdaGetter = EnumerableExtensions.CompileGetter<DataClass>("Nr");
+        private static readonly Func<DataClass, object> LambdaGetter = EnumerableExtensions.GetGetFunc<DataClass>("Nr");
         [Benchmark]
         public void Lambda() {
             for (var i = 0; i < _data.Count; i++) {
@@ -55,7 +55,7 @@ namespace ReflectionSpeed
             }
         }
 
-        private static readonly Func<DataClass, int> TypedLambdaLambdaGetter = EnumerableExtensions.CompileGetter<DataClass, int>("Nr");
+        private static readonly Func<DataClass, int> TypedLambdaLambdaGetter = EnumerableExtensions.GetGetFunc<DataClass, int>("Nr");
         [Benchmark]
         public void TypedLambda() {
             for (var i = 0; i < _data.Count; i++) {

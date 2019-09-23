@@ -36,7 +36,9 @@ namespace Tests
             var dictionaries = Enumerable.Range(1, 1000).Select(r => new SomeType {Nr = r, Text = r.ToString(), Nullable = r % 2 == 0 ? r / 2 : (int?) null}).ToDictionaryCollection().ToList();
             Assert.IsNotNull(dictionaries);
             Assert.AreEqual(1000, dictionaries.Count);
-            Assert.AreEqual("Nr", dictionaries[0].Keys.First());
+            Assert.IsTrue(dictionaries[0].ContainsKey("Nr"));
+            Assert.IsTrue(dictionaries[0].ContainsKey("Text"));
+            Assert.IsTrue(dictionaries[0].ContainsKey("Nullable"));
             Assert.AreEqual("1", dictionaries[0]["Text"]);
             Assert.AreEqual(1, dictionaries[0]["Nr"]);
         }
@@ -46,10 +48,10 @@ namespace Tests
             var dt = Enumerable.Range(1, 1000).Select(r => new SomeType {Nr = r, Text = r.ToString(), Nullable = r % 2 == 0 ? r / 2 : (int?) null}).ToDataTable();
             Assert.IsNotNull(dt);
             Assert.AreEqual(1000, dt.Rows.Count);
-            Assert.AreEqual(1, dt.Rows[0][0]);
-            Assert.AreEqual("1", dt.Rows[0][1]);
-            Assert.AreEqual(DBNull.Value, dt.Rows[0][2]);
-            Assert.AreEqual(1, dt.Rows[1][2]);
+            Assert.AreEqual(1, dt.Rows[0].ItemArray[0]);
+            Assert.AreEqual("1", dt.Rows[0].ItemArray[1]);
+            Assert.AreEqual(DBNull.Value, dt.Rows[0].ItemArray[2]);
+            Assert.AreEqual(1, dt.Rows[1].ItemArray[2]);
         }
 
         [Test]
@@ -57,7 +59,9 @@ namespace Tests
             var dictionaries = Enumerable.Range(1, 1000).Select(r => new {Nr = r, Text = r.ToString(), Nullable = r % 2 == 0 ? r / 2 : (int?) null}).ToDictionaryCollection().ToList();
             Assert.IsNotNull(dictionaries);
             Assert.AreEqual(1000, dictionaries.Count);
-            Assert.AreEqual("Nr", dictionaries[0].Keys.First());
+            Assert.IsTrue(dictionaries[0].ContainsKey("Nr"));
+            Assert.IsTrue(dictionaries[0].ContainsKey("Text"));
+            Assert.IsTrue(dictionaries[0].ContainsKey("Nullable"));
             Assert.AreEqual("1", dictionaries[0]["Text"]);
             Assert.AreEqual(1, dictionaries[0]["Nr"]);
         }
@@ -65,7 +69,7 @@ namespace Tests
         [Test]
         public void CompileTypedSetter() {
             var o = new SomeType();
-            var setter = EnumerableExtensions.CompileSetter<SomeType, int?>("Nullable");
+            var setter = EnumerableExtensions.GetSetAction<SomeType, int?>("Nullable");
 
             setter(o, 1);
             Assert.AreEqual(1, o.Nullable);
@@ -80,7 +84,7 @@ namespace Tests
         [Test]
         public void CompileSetter() {
             var o = new SomeType();
-            var setter = EnumerableExtensions.CompileSetter<SomeType>("Nullable");
+            var setter = EnumerableExtensions.GetSetAction<SomeType>("Nullable");
 
             setter(o, 1);
             Assert.AreEqual(1, o.Nullable);

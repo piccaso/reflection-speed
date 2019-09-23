@@ -22,7 +22,7 @@ namespace ReflectionSpeed
                     var prop = type.GetProperty("Nr");
 
                     void CompileGetter<TClass>(TClass obj, string propertyName) {
-                        var getter = EnumerableExtensions.CompileGetter<TClass>(propertyName);
+                        var getter = EnumerableExtensions.GetGetFunc<TClass>(propertyName);
                         _lambdaGetter = o => getter((TClass)o);
                     }
                     CompileGetter(item, "Nr");
