@@ -11,11 +11,11 @@ using FastMember;
 namespace ReflectionSpeed {
     [RankColumn, MemoryDiagnoser, Orderer(SummaryOrderPolicy.FastestToSlowest)]
     [PlainExporter, RPlotExporter]
-    [SimpleJob(invocationCount:1, runStrategy:BenchmarkDotNet.Engines.RunStrategy.Monitoring)]
+    //[SimpleJob(invocationCount:1, runStrategy:BenchmarkDotNet.Engines.RunStrategy.Monitoring)]
     public class CreateGetterOverhead {
 
-        //[Params(0, 1, 10_000, 100_000, 10_000_000)]
-        [Params(1000)]
+        [Params(0, 1, 10_000, 100_000, 10_000_000)]
+        //[Params(1000)]
         public int CollectionSize;
 
         [MethodImpl(MethodImplOptions.NoInlining)]
